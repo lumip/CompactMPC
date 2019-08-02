@@ -27,11 +27,15 @@ namespace CompactMPC.ObliviousTransfer
         private RandomNumberGenerator _randomNumberGenerator;
         private CryptoGroup _cryptoGroup;
         
-        public NaorPinkasObliviousTransfer(SecurityParameters parameters, CryptoContext cryptoContext)
+        public NaorPinkasObliviousTransfer(CryptoGroup cryptoGroup, CryptoContext cryptoContext)
         {
             _randomOracle = new HashRandomOracle(cryptoContext.HashAlgorithm);
             _randomNumberGenerator = new ThreadsafeRandomNumberGenerator(cryptoContext.RandomNumberGenerator);
-            _cryptoGroup = new MultiplicativeGroup(parameters);
+
+            if (cryptoGroup == null)
+                throw new ArgumentNullException(nameof(cryptoGroup));
+
+            _cryptoGroup = cryptoGroup;
 #if DEBUG
             Console.WriteLine("Security parameters:");
             Console.WriteLine("p = {0}", _cryptoGroup.Modulo);

@@ -10,6 +10,7 @@ using System.Net;
 using CompactMPC.Networking;
 using CompactMPC.Protocol;
 using CompactMPC.ObliviousTransfer;
+using CompactMPC.ObliviousTransfer.CryptoAlgebra;
 using CompactMPC.SampleCircuits;
 
 namespace CompactMPC.Application
@@ -64,7 +65,7 @@ namespace CompactMPC.Application
                 using (CryptoContext cryptoContext = CryptoContext.CreateDefault())
                 {
                     IObliviousTransfer obliviousTransfer = new NaorPinkasObliviousTransfer(
-                        SecurityParameters.CreateDefault768Bit(),
+                        new MultiplicativeGroup(SecurityParameters.CreateDefault768Bit()),
                         cryptoContext
                     );
 

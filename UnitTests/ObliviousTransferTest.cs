@@ -7,6 +7,7 @@ using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using CompactMPC.ObliviousTransfer;
+using CompactMPC.ObliviousTransfer.CryptoAlgebra;
 using CompactMPC.Networking;
 using CompactMPC.UnitTests.Util;
 
@@ -39,7 +40,7 @@ namespace CompactMPC.UnitTests
             using (CryptoContext cryptoContext = CryptoContext.CreateDefault())
             {
                 IGeneralizedObliviousTransfer obliviousTransfer = new NaorPinkasObliviousTransfer(
-                    SecurityParameters.CreateDefault768Bit(),
+                    new MultiplicativeGroup(SecurityParameters.CreateDefault768Bit()),
                     cryptoContext
                 );
 

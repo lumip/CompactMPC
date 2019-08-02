@@ -10,6 +10,7 @@ using CompactMPC.Circuits;
 using CompactMPC.Circuits.Batching;
 using CompactMPC.Networking;
 using CompactMPC.ObliviousTransfer;
+using CompactMPC.ObliviousTransfer.CryptoAlgebra;
 using CompactMPC.Protocol;
 using CompactMPC.SampleCircuits;
 using CompactMPC.UnitTests.Util;
@@ -79,7 +80,7 @@ namespace CompactMPC.UnitTests
                 using (CryptoContext cryptoContext = CryptoContext.CreateDefault())
                 {
                     IObliviousTransfer obliviousTransfer = new NaorPinkasObliviousTransfer(
-                        new SecurityParameters(47, 23, 4, 1, 1),
+                        new MultiplicativeGroup(new SecurityParameters(47, 23, 4, 1, 1)),
                         cryptoContext
                     );
 
