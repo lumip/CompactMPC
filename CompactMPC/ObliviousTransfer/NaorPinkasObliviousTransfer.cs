@@ -23,24 +23,22 @@ namespace CompactMPC.ObliviousTransfer
     /// </remarks>
     public class NaorPinkasObliviousTransfer : GeneralizedObliviousTransfer
     {
-        private SecurityParameters _parameters;
         private RandomOracle _randomOracle;
         private RandomNumberGenerator _randomNumberGenerator;
-        private CryptoGroup<BigInteger, BigInteger> _groupAlgebra;
+        private CryptoGroup<BigInteger, BigInteger> _cryptoGroup;
         
         public NaorPinkasObliviousTransfer(SecurityParameters parameters, CryptoContext cryptoContext)
         {
-            _parameters = parameters;
             _randomOracle = new HashRandomOracle(cryptoContext.HashAlgorithm);
             _randomNumberGenerator = new ThreadsafeRandomNumberGenerator(cryptoContext.RandomNumberGenerator);
-            _groupAlgebra = new MultiplicativeGroup(_parameters);
+            _cryptoGroup = new MultiplicativeGroup(parameters);
 #if DEBUG
             Console.WriteLine("Security parameters:");
-            Console.WriteLine("p = {0}", _parameters.P);
-            Console.WriteLine("q = {0}", _parameters.Q);
-            Console.WriteLine("g = {0}", _parameters.G);
-            Console.WriteLine("group element size = {0} bytes", _parameters.GroupElementSize);
-            Console.WriteLine("exponent size = {0} bytes", _parameters.ExponentSize);
+            Console.WriteLine("p = {0}", _cryptoGroup.Modulo);
+            Console.WriteLine("q = {0}", _cryptoGroup.Order);
+            Console.WriteLine("g = {0}", _cryptoGroup.Generator);
+            Console.WriteLine("group element size = {0} bytes", _cryptoGroup.GroupElementSize);
+            Console.WriteLine("exponent size = {0} bytes", _cryptoGroup.OrderSize);
 #endif
         }
 
@@ -194,16 +192,16 @@ namespace CompactMPC.ObliviousTransfer
 
         private CryptoGroupElement<BigInteger, BigInteger> GenerateGroupElement(out BigInteger index)
         {
-            // note(lumip): do not give in to the temptation of replacing the exponent > _parameters.Q part with a
+            // note(lumip): do not give in to the temptation of replacing the exponent > _cryptoGroup.Order part with a
             //  modulo operation, as that would cause the exponent to be no longer uniformly sampled (which could
             //  have an impact on security)
             do
             {
-                index = _randomNumberGenerator.GetBigInteger(_parameters.ExponentSize);
+                index = _randomNumberGenerator.GetBigInteger(_cryptoGroup.OrderSize);
             }
-            while (index.IsZero || index > _groupAlgebra.Order);
+            while (index.IsZero || index > _cryptoGroup.Order);
 
-            return _groupAlgebra.GenerateElement(index);
+            return _cryptoGroup.GenerateElement(index);
         }
 
         private Task WriteGroupElements(IMessageChannel channel, IReadOnlyList<CryptoGroupElement<BigInteger, BigInteger>> groupElements)
@@ -228,7 +226,7 @@ namespace CompactMPC.ObliviousTransfer
             {
                 int length = message.ReadInt();
                 byte[] packedGroupElement = message.ReadBuffer(length);
-                groupElements[i] = _groupAlgebra.CreateElementFromBytes(packedGroupElement);
+                groupElements[i] = _cryptoGroup.CreateElementFromBytes(packedGroupElement);
             }
 
             return groupElements;

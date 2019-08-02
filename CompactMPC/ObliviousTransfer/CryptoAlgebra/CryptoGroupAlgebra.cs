@@ -8,8 +8,10 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
     {
         public S Order { get; }
         public E Generator { get; }
+        public int GroupElementSize { get; }
+        public int OrderSize { get; }
 
-        public CryptoGroupAlgebra(E generator, S order)
+        public CryptoGroupAlgebra(E generator, S order, int groupElementSize, int orderSize)
         {
             if (generator == null)
                 throw new ArgumentNullException(nameof(generator));
@@ -18,6 +20,9 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             if (order == null)
                 throw new ArgumentNullException(nameof(order));
             Order = order;
+
+            GroupElementSize = groupElementSize;
+            OrderSize = orderSize;
         }
 
         public E GenerateElement(S index)

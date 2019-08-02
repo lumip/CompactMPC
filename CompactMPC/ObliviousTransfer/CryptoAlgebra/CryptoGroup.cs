@@ -17,6 +17,9 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 
         public S Order { get { return _groupAlgebra.Order; } }
 
+        public int GroupElementSize { get { return _groupAlgebra.GroupElementSize; } }
+        public int OrderSize { get { return _groupAlgebra.OrderSize; } }
+
         public CryptoGroupElement<E, S> Generator { get { return CreateGroupElement(_groupAlgebra.Generator, _groupAlgebra); } }
 
         public CryptoGroupElement<E, S> GenerateElement(S index)

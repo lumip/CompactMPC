@@ -9,15 +9,15 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
     {
         public BigInteger Modulo { get; }
 
-        public MultiplicativeGroupAlgebra(BigInteger primeModulo, BigInteger order, BigInteger generator) : base(generator, order)
+        public MultiplicativeGroupAlgebra(BigInteger primeModulo, BigInteger order, BigInteger generator, int groupElementSize, int orderSize)
+            : base(generator, order, groupElementSize, orderSize)
         {
             // note(lumip): currently not verifying that module is indeed prime or that generator is indeed a generator!
             Modulo = primeModulo;
         }
 
-        public MultiplicativeGroupAlgebra(BigInteger primeModulo, BigInteger generator) : this(primeModulo, primeModulo - 1, generator) { }
-
-        public MultiplicativeGroupAlgebra(SecurityParameters parameters) : this(parameters.P, parameters.Q, parameters.G) { }
+        public MultiplicativeGroupAlgebra(SecurityParameters parameters)
+            : this(parameters.P, parameters.Q, parameters.G, parameters.GroupElementSize, parameters.ExponentSize) { }
 
         public override BigInteger Add(BigInteger left, BigInteger right)
         {

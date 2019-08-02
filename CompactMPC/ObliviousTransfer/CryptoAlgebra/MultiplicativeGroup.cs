@@ -13,11 +13,8 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
         public MultiplicativeGroup(SecurityParameters parameters)
             : this(new MultiplicativeGroupAlgebra(parameters)) { }
 
-        public MultiplicativeGroup(BigInteger primeModulo, BigInteger order, BigInteger generator)
-            : this(new MultiplicativeGroupAlgebra(primeModulo, order, generator)) { }
-
-        public MultiplicativeGroup(BigInteger primeModulo, BigInteger generator)
-            : this(new MultiplicativeGroupAlgebra(primeModulo, generator)) { }
+        public MultiplicativeGroup(BigInteger primeModulo, BigInteger order, BigInteger generator, int groupElementSize, int orderSize)
+            : this(new MultiplicativeGroupAlgebra(primeModulo, order, generator, groupElementSize, orderSize)) { }
 
         protected override CryptoGroupElement<BigInteger, BigInteger> CreateGroupElement(BigInteger e, CryptoGroupAlgebra<BigInteger, BigInteger> groupAlgebra)
         {
