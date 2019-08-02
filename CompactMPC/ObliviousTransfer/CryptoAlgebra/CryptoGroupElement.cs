@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
 
 namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 {
-    public abstract class CryptoGroupElement<E, S>
+    public abstract class CryptoGroupElement
     {
-        private CryptoGroupAlgebra<E, S> _groupAlgebra;
-        public E Value { get; private set; }
+        private CryptoGroupAlgebra _groupAlgebra;
+        public BigInteger Value { get; private set; }
 
-        public CryptoGroupElement(E value, CryptoGroupAlgebra<E, S> groupAlgebra)
+        public CryptoGroupElement(BigInteger value, CryptoGroupAlgebra groupAlgebra)
         {
             if (groupAlgebra == null)
                 throw new ArgumentNullException(nameof(groupAlgebra));
@@ -20,19 +21,19 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             Value = value;
         }
 
-        public CryptoGroupElement<E, S> Clone()
+        public CryptoGroupElement Clone()
         {
             return Create(Value, _groupAlgebra);
         }
 
-        public void Add(CryptoGroupElement<E, S> e)
+        public void Add(CryptoGroupElement e)
         {
             if (_groupAlgebra != e._groupAlgebra)
                 throw new ArgumentException("Added group element must be from the same group!", nameof(e));
             Value = _groupAlgebra.Add(Value, e.Value);
         }
 
-        public void MultiplyScalar(S k)
+        public void MultiplyScalar(BigInteger k)
         {
             Value = _groupAlgebra.MultiplyScalar(Value, k);
         }
@@ -42,21 +43,21 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             Value = _groupAlgebra.Invert(Value);
         }
 
-        public static CryptoGroupElement<E, S> operator +(CryptoGroupElement<E, S> left, CryptoGroupElement<E, S> right)
+        public static CryptoGroupElement operator +(CryptoGroupElement left, CryptoGroupElement right)
         {
             var result = left.Clone();
             result.Add(right);
             return result;
         }
 
-        public static CryptoGroupElement<E, S> operator -(CryptoGroupElement<E, S> e)
+        public static CryptoGroupElement operator -(CryptoGroupElement e)
         {
             var result = e.Clone();
             result.Invert();
             return result;
         }
 
-        public static CryptoGroupElement<E, S> operator -(CryptoGroupElement<E, S> left, CryptoGroupElement<E, S> right)
+        public static CryptoGroupElement operator -(CryptoGroupElement left, CryptoGroupElement right)
         {
             var result = right.Clone();
             result.Invert();
@@ -64,19 +65,19 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             return result;
         }
 
-        public static CryptoGroupElement<E, S> operator *(CryptoGroupElement<E, S> e, S k)
+        public static CryptoGroupElement operator *(CryptoGroupElement e, BigInteger k)
         {
             var result = e.Clone();
             result.MultiplyScalar(k);
             return result;
         }
 
-        public static CryptoGroupElement<E, S> operator *(S k, CryptoGroupElement<E, S> e)
+        public static CryptoGroupElement operator *(BigInteger k, CryptoGroupElement e)
         {
             return e * k;
         }
 
-        protected abstract CryptoGroupElement<E, S> Create(E value, CryptoGroupAlgebra<E, S> groupAlgebra);
+        protected abstract CryptoGroupElement Create(BigInteger value, CryptoGroupAlgebra groupAlgebra);
         public abstract byte[] ToByteArray();
     }
 }

@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 {
-    public class MultiplicativeGroupAlgebra : CryptoGroupAlgebra<BigInteger, BigInteger>
+    public class MultiplicativeGroupAlgebra : CryptoGroupAlgebra
     {
         public BigInteger Modulo { get; }
 
@@ -27,11 +27,6 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
         public override BigInteger MultiplyScalar(BigInteger e, BigInteger k)
         {
             return BigInteger.ModPow(e, k, Modulo);
-        }
-
-        public override BigInteger Invert(BigInteger e)
-        {
-            return MultiplyScalar(e, Order - 1);
         }
     }
 }

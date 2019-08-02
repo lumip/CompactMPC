@@ -25,7 +25,7 @@ namespace CompactMPC.ObliviousTransfer
     {
         private RandomOracle _randomOracle;
         private RandomNumberGenerator _randomNumberGenerator;
-        private CryptoGroup<BigInteger, BigInteger> _cryptoGroup;
+        private CryptoGroup _cryptoGroup;
         
         public NaorPinkasObliviousTransfer(SecurityParameters parameters, CryptoContext cryptoContext)
         {
@@ -48,7 +48,7 @@ namespace CompactMPC.ObliviousTransfer
             Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
             
-            Quadruple<CryptoGroupElement<BigInteger, BigInteger>> listOfCs = new Quadruple<CryptoGroupElement<BigInteger, BigInteger>>();
+            Quadruple<CryptoGroupElement> listOfCs = new Quadruple<CryptoGroupElement>();
             Quadruple<BigInteger> listOfExponents = new Quadruple<BigInteger>();
 
             Parallel.For(0, 4, i =>
@@ -67,16 +67,16 @@ namespace CompactMPC.ObliviousTransfer
 #endif
 
             Task writeCsTask = WriteGroupElements(channel, listOfCs);
-            Task<CryptoGroupElement<BigInteger, BigInteger>[]> readDsTask = ReadGroupElements(channel, numberOfInvocations);
+            Task<CryptoGroupElement[]> readDsTask = ReadGroupElements(channel, numberOfInvocations);
 
-            Quadruple<CryptoGroupElement<BigInteger, BigInteger>> listOfExponentiatedCs = new Quadruple<CryptoGroupElement<BigInteger, BigInteger>>();
+            Quadruple<CryptoGroupElement> listOfExponentiatedCs = new Quadruple<CryptoGroupElement>();
             Parallel.For(1, 4, i =>
             {
                 listOfExponentiatedCs[i] = listOfCs[i] * alpha;
             });
 
             await Task.WhenAll(writeCsTask, readDsTask);
-            CryptoGroupElement<BigInteger, BigInteger>[] listOfDs = readDsTask.Result;
+            CryptoGroupElement[] listOfDs = readDsTask.Result;
 
 #if DEBUG
             stopwatch.Stop();
@@ -88,12 +88,12 @@ namespace CompactMPC.ObliviousTransfer
             Parallel.For(0, numberOfInvocations, j =>
             {
                 maskedOptions[j] = new Quadruple<byte[]>();
-                CryptoGroupElement<BigInteger, BigInteger> exponentiatedD = listOfDs[j] * alpha;
-                CryptoGroupElement<BigInteger, BigInteger> inverseExponentiatedD = -exponentiatedD;
+                CryptoGroupElement exponentiatedD = listOfDs[j] * alpha;
+                CryptoGroupElement inverseExponentiatedD = -exponentiatedD;
 
                 Parallel.For(0, 4, i =>
                 {
-                    CryptoGroupElement<BigInteger, BigInteger> e = exponentiatedD;
+                    CryptoGroupElement e = exponentiatedD;
                     if (i > 0)
                         e = listOfExponentiatedCs[i] + inverseExponentiatedD;
 
@@ -131,7 +131,7 @@ namespace CompactMPC.ObliviousTransfer
             Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 
-            Quadruple<CryptoGroupElement<BigInteger, BigInteger>> listOfCs = new Quadruple<CryptoGroupElement<BigInteger, BigInteger>>(await ReadGroupElements(channel, 4));
+            Quadruple<CryptoGroupElement> listOfCs = new Quadruple<CryptoGroupElement>(await ReadGroupElements(channel, 4));
 
 #if DEBUG
             stopwatch.Stop();
@@ -140,7 +140,7 @@ namespace CompactMPC.ObliviousTransfer
 #endif
 
             BigInteger[] listOfBetas = new BigInteger[numberOfInvocations];
-            CryptoGroupElement<BigInteger, BigInteger>[] listOfDs = new CryptoGroupElement<BigInteger, BigInteger>[numberOfInvocations];
+            CryptoGroupElement[] listOfDs = new CryptoGroupElement[numberOfInvocations];
 
             Parallel.For(0, numberOfInvocations, j =>
             {
@@ -158,7 +158,7 @@ namespace CompactMPC.ObliviousTransfer
             Task writeDsTask = WriteGroupElements(channel, listOfDs);
             Task<Quadruple<byte[]>[]> readMaskedOptionsTask = ReadOptions(channel, numberOfInvocations, numberOfMessageBytes);
 
-            CryptoGroupElement<BigInteger, BigInteger>[] listOfEs = new CryptoGroupElement<BigInteger, BigInteger>[numberOfInvocations];
+            CryptoGroupElement[] listOfEs = new CryptoGroupElement[numberOfInvocations];
             Parallel.For(0, numberOfInvocations, j =>
             {
                 int i = selectionIndices[j];
@@ -178,7 +178,7 @@ namespace CompactMPC.ObliviousTransfer
             Parallel.For(0, numberOfInvocations, j =>
             {
                 int i = selectionIndices[j];
-                CryptoGroupElement<BigInteger, BigInteger> e = listOfEs[j];
+                CryptoGroupElement e = listOfEs[j];
                 selectedOptions[j] = MaskOption(maskedOptions[j][i], e, j, i);
             });
 
@@ -190,7 +190,7 @@ namespace CompactMPC.ObliviousTransfer
             return selectedOptions;
         }
 
-        private CryptoGroupElement<BigInteger, BigInteger> GenerateGroupElement(out BigInteger index)
+        private CryptoGroupElement GenerateGroupElement(out BigInteger index)
         {
             // note(lumip): do not give in to the temptation of replacing the exponent > _cryptoGroup.Order part with a
             //  modulo operation, as that would cause the exponent to be no longer uniformly sampled (which could
@@ -204,7 +204,7 @@ namespace CompactMPC.ObliviousTransfer
             return _cryptoGroup.GenerateElement(index);
         }
 
-        private Task WriteGroupElements(IMessageChannel channel, IReadOnlyList<CryptoGroupElement<BigInteger, BigInteger>> groupElements)
+        private Task WriteGroupElements(IMessageChannel channel, IReadOnlyList<CryptoGroupElement> groupElements)
         {
             MessageComposer message = new MessageComposer(2 * groupElements.Count);
             foreach (var groupElement in groupElements)
@@ -217,11 +217,11 @@ namespace CompactMPC.ObliviousTransfer
             return channel.WriteMessageAsync(message.Compose());
         }
 
-        private async Task<CryptoGroupElement<BigInteger, BigInteger>[]> ReadGroupElements(IMessageChannel channel, int numberOfGroupElements)
+        private async Task<CryptoGroupElement[]> ReadGroupElements(IMessageChannel channel, int numberOfGroupElements)
         {
             MessageDecomposer message = new MessageDecomposer(await channel.ReadMessageAsync());
 
-            CryptoGroupElement<BigInteger, BigInteger>[] groupElements = new CryptoGroupElement<BigInteger, BigInteger>[numberOfGroupElements];
+            CryptoGroupElement[] groupElements = new CryptoGroupElement[numberOfGroupElements];
             for (int i = 0; i < numberOfGroupElements; ++i)
             {
                 int length = message.ReadInt();
@@ -271,7 +271,7 @@ namespace CompactMPC.ObliviousTransfer
         /// <param name="invocationIndex">The index of the OT invocation this options belongs to.</param>
         /// <param name="optionIndex">The index of the option.</param>
         /// <returns>The masked option.</returns>
-        private byte[] MaskOption(byte[] option, CryptoGroupElement<BigInteger, BigInteger> groupElement,  int invocationIndex, int optionIndex)
+        private byte[] MaskOption(byte[] option, CryptoGroupElement groupElement,  int invocationIndex, int optionIndex)
         {
             byte[] query = BufferBuilder.From(groupElement.ToByteArray()).With(invocationIndex).With(optionIndex).Create();
             return _randomOracle.Mask(option, query);

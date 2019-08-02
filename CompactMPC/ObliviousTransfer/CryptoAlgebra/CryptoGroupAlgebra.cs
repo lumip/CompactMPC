@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
 
 namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 {
-    public abstract class CryptoGroupAlgebra<E, S>
+    public abstract class CryptoGroupAlgebra
     {
-        public S Order { get; }
-        public E Generator { get; }
+        public BigInteger Order { get; }
+        public BigInteger Generator { get; }
         public int GroupElementSize { get; }
         public int OrderSize { get; }
 
-        public CryptoGroupAlgebra(E generator, S order, int groupElementSize, int orderSize)
+        public CryptoGroupAlgebra(BigInteger generator, BigInteger order, int groupElementSize, int orderSize)
         {
             if (generator == null)
                 throw new ArgumentNullException(nameof(generator));
@@ -25,18 +26,17 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             OrderSize = orderSize;
         }
 
-        public E GenerateElement(S index)
+        public BigInteger GenerateElement(BigInteger index)
         {
             return MultiplyScalar(Generator, index);
         }
 
-        public abstract E Add(E left, E right);
-        public abstract E MultiplyScalar(E e, S scalar);
+        public BigInteger Invert(BigInteger e)
+        {
+            return MultiplyScalar(e, Order - 1);
+        }
 
-        public abstract E Invert(E e);
-        // todo(lumip): can implement as below if I can constrain type S to have operator-
-        //{
-        //    return MultiplyScalar(e, Order - 1);
-        //}
+        public abstract BigInteger Add(BigInteger left, BigInteger right);
+        public abstract BigInteger MultiplyScalar(BigInteger e, BigInteger scalar);
     }
 }

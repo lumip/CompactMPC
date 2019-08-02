@@ -5,9 +5,9 @@ using System.Numerics;
 
 namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 {
-    public class MultiplicativeGroupElement : CryptoGroupElement<BigInteger, BigInteger>
+    public class MultiplicativeGroupElement : CryptoGroupElement
     {
-        public MultiplicativeGroupElement(BigInteger value, CryptoGroupAlgebra<BigInteger, BigInteger> groupAlgebra)
+        public MultiplicativeGroupElement(BigInteger value, CryptoGroupAlgebra groupAlgebra)
             : base(value, groupAlgebra) { }
 
         public override byte[] ToByteArray()
@@ -15,7 +15,7 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             return Value.ToByteArray();
         }
 
-        protected override CryptoGroupElement<BigInteger, BigInteger> Create(BigInteger value, CryptoGroupAlgebra<BigInteger, BigInteger> groupAlgebra)
+        protected override CryptoGroupElement Create(BigInteger value, CryptoGroupAlgebra groupAlgebra)
         {
             return new MultiplicativeGroupElement(Value, groupAlgebra);
         }
