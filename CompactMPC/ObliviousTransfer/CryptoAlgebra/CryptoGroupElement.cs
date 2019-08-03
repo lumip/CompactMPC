@@ -40,7 +40,7 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 
         public void Invert()
         {
-            Value = _groupAlgebra.Invert(Value);
+            Value = _groupAlgebra.Negate(Value);
         }
 
         public static CryptoGroupElement operator +(CryptoGroupElement left, CryptoGroupElement right)
