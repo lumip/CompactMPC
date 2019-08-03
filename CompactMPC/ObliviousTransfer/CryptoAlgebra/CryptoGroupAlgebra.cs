@@ -12,6 +12,9 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
         public int GroupElementSize { get; }
         public int OrderSize { get; }
 
+        public int GroupElementBitlen { get { return 8 * GroupElementSize; } }
+        public int OrderBitlen { get { return 8 * OrderSize; } }
+
         public CryptoGroupAlgebra(BigInteger generator, BigInteger order, int groupElementSize, int orderSize)
         {
             if (generator == null)
