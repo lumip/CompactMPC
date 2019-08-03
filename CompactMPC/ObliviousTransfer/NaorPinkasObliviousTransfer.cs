@@ -38,7 +38,6 @@ namespace CompactMPC.ObliviousTransfer
             _cryptoGroup = cryptoGroup;
 #if DEBUG
             Console.WriteLine("Security parameters:");
-            Console.WriteLine("p = {0}", _cryptoGroup.Modulo);
             Console.WriteLine("q = {0}", _cryptoGroup.Order);
             Console.WriteLine("g = {0}", _cryptoGroup.Generator);
             Console.WriteLine("group element size = {0} bytes", _cryptoGroup.GroupElementSize);
