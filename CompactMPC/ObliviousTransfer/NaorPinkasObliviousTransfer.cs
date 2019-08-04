@@ -200,7 +200,7 @@ namespace CompactMPC.ObliviousTransfer
             //  have an impact on security)
             do
             {
-                index = _randomNumberGenerator.GetBigInteger(_cryptoGroup.OrderSize);
+                index = _randomNumberGenerator.GetBigInteger(_cryptoGroup.FactorSize);
             }
             while (index.IsZero || index >= _cryptoGroup.Order);
 

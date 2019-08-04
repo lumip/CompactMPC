@@ -12,11 +12,9 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
         public BigInteger Generator { get; }
         public int GroupElementSize { get; }
         public int OrderSize { get; }
+        public int FactorSize { get; }
 
-        public int GroupElementBitlen { get { return 8 * GroupElementSize; } }
-        public int OrderBitlen { get { return 8 * OrderSize; } }
-
-        public CryptoGroupAlgebra(BigInteger generator, BigInteger order, int groupElementSize, int orderSize)
+        public CryptoGroupAlgebra(BigInteger generator, BigInteger order, int groupElementSize, int orderSize, int factorSize)
         {
             if (generator == null)
                 throw new ArgumentNullException(nameof(generator));
@@ -28,7 +26,11 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 
             GroupElementSize = groupElementSize;
             OrderSize = orderSize;
+            FactorSize = factorSize;
         }
+
+        public CryptoGroupAlgebra(BigInteger generator, BigInteger order, int groupElementSize, int orderSize)
+            : this(generator, order, groupElementSize, orderSize, orderSize) { }
 
         public BigInteger GenerateElement(BigInteger index)
         {
@@ -37,7 +39,7 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
 
         public virtual BigInteger Negate(BigInteger e)
         {
-            return MultiplyScalar(e, Order - 1);
+            return MultiplyScalar(e, Order - 1, OrderSize);
         }
 
         protected BigInteger Multiplex(BigInteger selection, BigInteger left, BigInteger right)
@@ -52,7 +54,7 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             return Multiplex(sel, left, right);
         }
 
-        public virtual BigInteger MultiplyScalar(BigInteger e, BigInteger k)
+        protected virtual BigInteger MultiplyScalar(BigInteger e, BigInteger k, int factorSize)
         {
             // note(lumip): double-and-add (in this case: square-and-multiply)
             //  implementation that issues the same amount of adds no matter
@@ -60,12 +62,16 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             //  safe(r) against timing/power/cache/branch prediction(?)
             //  side channel attacks.
 
+            int factorBitlen = 8 * factorSize;
+            BigInteger maxFactor = BigInteger.One << factorBitlen;
+            if (k >= maxFactor)
+                throw new ArgumentException("The given factor is larger than the maximum admittable factor.", nameof(k));
+
             k = k % Order; // k * e is at least periodic in Order
             BigInteger r0 = IdentityElement;
 
-            int i = OrderBitlen - 1;
-
-            for (BigInteger mask = BigInteger.One << (OrderBitlen - 1); !mask.IsZero; mask = mask >> 1, --i)
+            int i = factorBitlen - 1;
+            for (BigInteger mask = maxFactor >> 1; !mask.IsZero; mask = mask >> 1, --i)
             {
                 BigInteger bitI = (k & mask) >> i;
                 r0 = Add(r0, r0);
@@ -75,6 +81,11 @@ namespace CompactMPC.ObliviousTransfer.CryptoAlgebra
             }
             Debug.Assert(i == -1);
             return r0;
+        }
+
+        public BigInteger MultiplyScalar(BigInteger e, BigInteger k)
+        {
+            return MultiplyScalar(e, k, FactorSize);
         }
 
         public abstract BigInteger IdentityElement { get; }

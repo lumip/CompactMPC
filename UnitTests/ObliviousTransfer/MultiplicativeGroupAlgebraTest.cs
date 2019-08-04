@@ -48,8 +48,8 @@ namespace CompactMPC.UnitTests.ObliviousTransfer
             {
                 MultiplicativeGroupAlgebra groupAlgebra = new MultiplicativeGroupAlgebra(SecurityParameters.CreateDefault768Bit());
 
-                var x = groupAlgebra.GenerateElement(cryptoContext.RandomNumberGenerator.GetBigInteger(groupAlgebra.OrderSize));
-                var k = cryptoContext.RandomNumberGenerator.GetBigInteger(groupAlgebra.OrderSize);
+                var x = groupAlgebra.GenerateElement(cryptoContext.RandomNumberGenerator.GetBigInteger(groupAlgebra.FactorSize));
+                var k = cryptoContext.RandomNumberGenerator.GetBigInteger(groupAlgebra.FactorSize);
 
                 var expectedR = groupAlgebra.MultiplyScalarUnsafe(x, k);
                 var actualR = groupAlgebra.MultiplyScalar(x, k);
